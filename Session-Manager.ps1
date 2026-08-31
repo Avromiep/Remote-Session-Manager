@@ -755,7 +755,9 @@ $procTemplate = @'
                              Background="Transparent" Foreground="{DynamicResource Text}" CaretBrush="{DynamicResource Text}"/>
                 </Border>
                 <Button x:Name="PRefresh" Style="{StaticResource Tool}" Content="Refresh"/>
-                <Button x:Name="PEnd" Style="{StaticResource Primary}" Content="End Task" Margin="0"/>
+                <Button x:Name="PEnd" Style="{StaticResource Primary}" Content="End Task"/>
+                <Button x:Name="PEndAll" Style="{StaticResource Tool}" Content="End All" Margin="0"
+                        ToolTip="End every process in this session"/>
             </StackPanel>
         </Border>
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="12,6">
@@ -787,7 +789,7 @@ function Show-ProcessWindow {
     $pw.Owner = $window
     $pw.Title = "Processes - $Username (session $SessionId on $Server)"
     $PHeader = $pw.FindName('PHeader'); $PFilter = $pw.FindName('PFilter')
-    $PRefresh = $pw.FindName('PRefresh'); $PEnd = $pw.FindName('PEnd')
+    $PRefresh = $pw.FindName('PRefresh'); $PEnd = $pw.FindName('PEnd'); $PEndAll = $pw.FindName('PEndAll')
     $PStatus = $pw.FindName('PStatus'); $PGrid = $pw.FindName('PGrid')
     $PHeader.Text = "$Username on $Server (session $SessionId)"
 
@@ -838,8 +840,24 @@ function Show-ProcessWindow {
         if ($fail) { $PStatus.Text = "$($procs.Count) process(es). $fail could not be ended." }
     }.GetNewClosure()
 
+    $endAll = {
+        if (-not $cim -or $procs.Count -eq 0) { return }
+        if ([System.Windows.MessageBox]::Show("End ALL $($procs.Count) processes for $Username on ${Server} (session $SessionId)?",
+                "Confirm End All", 'YesNo', 'Warning') -ne 'Yes') { return }
+        $fail = 0
+        foreach ($proc in @($procs)) {
+            try {
+                $inst = Get-CimInstance -CimSession $cim -ClassName Win32_Process -Filter "ProcessId=$($proc.Pid)" -ErrorAction Stop
+                if ($inst) { Invoke-CimMethod -CimSession $cim -InputObject $inst -MethodName Terminate -ErrorAction Stop | Out-Null }
+            } catch { $fail++ }
+        }
+        & $loadProcs
+        if ($fail) { $PStatus.Text = "$($procs.Count) process(es). $fail could not be ended." }
+    }.GetNewClosure()
+
     $PRefresh.Add_Click($loadProcs)
     $PEnd.Add_Click($endTask)
+    $PEndAll.Add_Click($endAll)
     $PGrid.Add_MouseDoubleClick($endTask)
 
     $pmenu = New-Object System.Windows.Controls.ContextMenu
