@@ -400,6 +400,13 @@ $mainTemplate = @'
                     <DataGridTextColumn Header="C: Free"      Binding="{Binding DiskSpace}"    Width="90"/>
                     <DataGridTextColumn Header="Sessions"     Binding="{Binding SessionsOpen}" Width="80"/>
                 </DataGrid.Columns>
+                <!-- Hover hint on session rows (based on the shared themed row style,
+                     so it keeps the disconnected-row dimming). -->
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                        <Setter Property="ToolTip" Value="Double-click to see the process tree"/>
+                    </Style>
+                </DataGrid.RowStyle>
             </DataGrid>
         </Border>
     </DockPanel>
