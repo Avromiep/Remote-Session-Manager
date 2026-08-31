@@ -1,0 +1,7 @@
+# Your real server list and the AD display-name cache stay LOCAL (never published).
+# The app still reads servers.txt from this folder when the Servers box is empty.
+servers.txt
+scriptcache
+
+# Local backup of the upstream v1.3 script (kept on disk, not in the repo).
+Session-Manager.v1.3.original.ps1
