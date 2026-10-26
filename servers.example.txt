@@ -1,0 +1,10 @@
+# Remote Session Manager - server list
+#
+# Rename (or copy) this file to "servers.txt" in the same folder, then list one
+# machine per line. When the "Servers" box in the app is left empty, the app
+# reads this list on Refresh. Entries can be RDS/terminal servers OR individual
+# workstations. Blank lines are ignored.
+
+RDS-SERVER-01
+RDS-SERVER-02
+WORKSTATION-101
